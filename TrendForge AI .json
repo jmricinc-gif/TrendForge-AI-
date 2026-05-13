@@ -1,0 +1,582 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 6
+            }
+          ]
+        }
+      },
+      "id": "08eef6f9-a8dd-4bfc-92b9-e0ac48f02dcf",
+      "name": "Daily Trend Scanner",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        240,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "all",
+        "limit": 20,
+        "additionalFields": {
+          "tags": [
+            "story",
+            "front_page"
+          ]
+        }
+      },
+      "id": "8aaabacf-49a8-4bdb-9ffb-c93de7faa111",
+      "name": "Fetch Hacker News Trends",
+      "type": "n8n-nodes-base.hackerNews",
+      "typeVersion": 1,
+      "position": [
+        464,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "id": "1449671a-497b-4e22-ad53-f07bd7c1990c",
+      "name": "Combine All Trend Sources",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        688,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "subreddit": "programming,technology,artificial,MachineLearning",
+        "keyword": "AI automation workflow",
+        "limit": 20,
+        "additionalFields": {
+          "sort": "hot"
+        }
+      },
+      "id": "8734fcf9-a434-444d-9161-decc83405360",
+      "name": "Search Reddit Trends",
+      "type": "n8n-nodes-base.reddit",
+      "typeVersion": 1,
+      "position": [
+        464,
+        496
+      ],
+      "credentials": {
+        "redditOAuth2Api": {
+          "id": "6nlBj1y7VCk8xPVg",
+          "name": "Reddit account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "messages": {
+          "message": [
+            {
+              "content": "What are the top 3 trending topics in AI, automation, and developer tools this week? Focus on GitHub stars, product launches, and viral discussions. Be specific with names and links."
+            }
+          ]
+        },
+        "simplify": true,
+        "options": {
+          "maxTokens": 500,
+          "returnRelatedQuestions": true,
+          "searchRecency": "week"
+        },
+        "requestOptions": {}
+      },
+      "id": "0a3c7724-1a43-4848-8f40-9d1aede447d2",
+      "name": "Get Real-Time Tech Insights",
+      "type": "n8n-nodes-base.perplexity",
+      "typeVersion": 2,
+      "position": [
+        464,
+        688
+      ],
+      "credentials": {
+        "perplexityApi": {
+          "id": "qimIRRslFie7C6jR",
+          "name": "Perplexity account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "allTrends",
+        "options": {}
+      },
+      "id": "1113d542-617d-4862-a0f9-862f1ad15e7f",
+      "name": "Aggregate All Trends",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        912,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Analyze these trending topics and create viral GTM content:\n\n{{ JSON.stringify($json.allTrends, null, 2) }}\n\nCreate:\n1. A compelling LinkedIn post (max 1300 chars) with hooks, value, and CTA\n2. A Twitter thread (5 tweets) with viral potential\n3. A Slack announcement for tech communities\n4. An email campaign (subject + body)\n5. A GitHub repo description showcasing n8n automation skills\n\nFocus on: AI automation, n8n workflows, GTM strategy, developer productivity.\nMake it authentic, valuable, and shareable. Include relevant hashtags and emojis.",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are a viral GTM content strategist specializing in developer tools, AI automation, and n8n workflows. Create content that gets maximum engagement on LinkedIn, Twitter, GitHub, and tech communities. Focus on trending topics, practical value, and authentic storytelling. Your content should position the user as a thought leader in automation and help them land a GTM role.",
+          "maxIterations": 5,
+          "returnIntermediateSteps": false
+        }
+      },
+      "id": "20c5a6ab-b42a-4fa5-a284-7fef335f1532",
+      "name": "AI GTM Content Generator",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1136,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "builtInTools": {},
+        "options": {
+          "maxTokens": 1500,
+          "temperature": 0.7
+        }
+      },
+      "id": "e9c97070-b123-4761-97d1-db2b32c8eb3e",
+      "name": "GPT-5 Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1144,
+        720
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "M5ZEubNHgVoBqs8s",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": {
+          "topTrend": "string",
+          "headline": "string",
+          "linkedInPost": "string",
+          "twitterThread": [
+            "string"
+          ],
+          "slackMessage": "string",
+          "emailSubject": "string",
+          "emailBody": "string",
+          "githubDescription": "string",
+          "viralScore": 0,
+          "targetAudience": "string"
+        }
+      },
+      "id": "eac0fc95-2ecf-4a2e-9923-0861b86117c3",
+      "name": "Structured Content Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1272,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "viral-check",
+              "leftValue": "={{ $json.output.viralScore }}",
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              },
+              "rightValue": 70
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          }
+        },
+        "options": {}
+      },
+      "id": "5f682343-4d1c-447c-b8fe-fd418947b831",
+      "name": "Check Viral Potential",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1488,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "value": "OObXfggPesvM52qu",
+          "mode": "list",
+          "cachedResultName": "trend",
+          "cachedResultUrl": "/projects/V8hNNAJZIMSskLfs/datatables/OObXfggPesvM52qu"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyValue": "={{ $json.output.topTrend }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "trend": "={{ $json.output.topTrend }}",
+            "headline": "={{ $json.output.headline }}",
+            "linkedin_post": "={{ $json.output.linkedInPost }}",
+            "twitter_thread": "={{ JSON.stringify($json.output.twitterThread) }}",
+            "viral_score": "={{ $json.output.viralScore }}",
+            "created_at": "={{ $now.toISO() }}",
+            "status": "ready_to_publish"
+          }
+        },
+        "options": {}
+      },
+      "id": "17082fc1-6413-4753-b821-aa8b4ac4d4dd",
+      "name": "Save Viral Content",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1712,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "communityManagement",
+        "person": "<__PLACEHOLDER_VALUE__Your LinkedIn Person URN__>",
+        "text": "={{ $('AI GTM Content Generator').item.json.output.linkedInPost }}",
+        "additionalFields": {
+          "visibility": "PUBLIC"
+        }
+      },
+      "id": "5936fd8a-1f9c-44b8-928d-75078285c597",
+      "name": "Post to LinkedIn",
+      "type": "n8n-nodes-base.linkedIn",
+      "typeVersion": 1,
+      "position": [
+        1936,
+        400
+      ],
+      "credentials": {
+        "linkedInCommunityManagementOAuth2Api": {
+          "id": "LeOgIsCf9jJOuK6v",
+          "name": "LinkedIn account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "text": "={{ $('AI GTM Content Generator').item.json.output[\"twitterThread[0]\"] }}",
+        "additionalFields": {}
+      },
+      "id": "f8390349-6dbc-4b60-98d6-2adedf63a9d5",
+      "name": "Post Twitter Thread",
+      "type": "n8n-nodes-base.twitter",
+      "typeVersion": 2,
+      "position": [
+        2160,
+        384
+      ],
+      "credentials": {
+        "twitterOAuth2Api": {
+          "id": "JCAXREaNAYsyMaxI",
+          "name": "X account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "#gen",
+          "mode": "name"
+        },
+        "text": "={{ $('AI GTM Content Generator').item.json.output.slackMessage }}\n\n📊 Viral Score: {{ $('AI GTM Content Generator').item.json.output.viralScore }}\n🎯 Audience: {{ $('AI GTM Content Generator').item.json.output.targetAudience }}\n\n🔗 LinkedIn: Posted\n🐦 Twitter: Thread live\n\n#n8n #automation #AI",
+        "otherOptions": {
+          "includeLinkToWorkflow": true
+        }
+      },
+      "id": "eb8ab5b1-f7bd-4095-8c55-78f4e98d6bc8",
+      "name": "Post to Slack Community",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.4,
+      "position": [
+        2384,
+        400
+      ],
+      "webhookId": "2f301c11-8ed4-4e76-9d1d-83dcd45de9df",
+      "credentials": {
+        "slackApi": {
+          "id": "40lw8DAdi6PKbTnO",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "sendTo": "<__PLACEHOLDER_VALUE__Your target email list or personal email__>",
+        "subject": "={{ $('AI GTM Content Generator').item.json.output.emailSubject }}",
+        "message": "={{ $('AI GTM Content Generator').item.json.output.emailBody }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "816361b4-be6a-445d-b0b1-30e4f76d854f",
+      "name": "Send Email Campaign",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2608,
+        400
+      ],
+      "webhookId": "14b095e1-bfd2-4c23-a9f6-7de9a885a9dd",
+      "credentials": {
+        "googleApi": {
+          "id": "3hTXTkPmTVNVqVrv",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "#mytests",
+          "mode": "name"
+        },
+        "text": "=⚠️ Content viral score below threshold\n\n📊 Score: {{ $json.output.viralScore }}/100\n📝 Trend: {{ $json.output.topTrend }}\n\nContent saved but not published. Review and optimize before posting.",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "id": "f13f0187-f6af-4b86-a493-e46df14a27d9",
+      "name": "Low Score Alert",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.4,
+      "position": [
+        1712,
+        592
+      ],
+      "webhookId": "1b6e308f-828b-4788-bd19-639334ba7f46",
+      "credentials": {
+        "slackApi": {
+          "id": "40lw8DAdi6PKbTnO",
+          "name": "Slack account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Daily Trend Scanner": {
+      "main": [
+        [
+          {
+            "node": "Fetch Hacker News Trends",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Search Reddit Trends",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Real-Time Tech Insights",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Hacker News Trends": {
+      "main": [
+        [
+          {
+            "node": "Combine All Trend Sources",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Combine All Trend Sources": {
+      "main": [
+        [
+          {
+            "node": "Aggregate All Trends",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Reddit Trends": {
+      "main": [
+        [
+          {
+            "node": "Combine All Trend Sources",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Get Real-Time Tech Insights": {
+      "main": [
+        [
+          {
+            "node": "Combine All Trend Sources",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Aggregate All Trends": {
+      "main": [
+        [
+          {
+            "node": "AI GTM Content Generator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI GTM Content Generator": {
+      "main": [
+        [
+          {
+            "node": "Check Viral Potential",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GPT-5 Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI GTM Content Generator",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Content Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI GTM Content Generator",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Viral Potential": {
+      "main": [
+        [
+          {
+            "node": "Save Viral Content",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Low Score Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Viral Content": {
+      "main": [
+        [
+          {
+            "node": "Post to LinkedIn",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post to LinkedIn": {
+      "main": [
+        [
+          {
+            "node": "Post Twitter Thread",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post Twitter Thread": {
+      "main": [
+        [
+          {
+            "node": "Post to Slack Community",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post to Slack Community": {
+      "main": [
+        [
+          {
+            "node": "Send Email Campaign",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "688054d3e73aed8f528cd46a68c9cd61fe7208c04099904e63796572ffa16833"
+  }
+}
