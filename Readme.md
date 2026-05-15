@@ -1,4 +1,4 @@
-# TrendForge AI 🚀
+  # TrendForge AI 🚀
 
 AI-powered n8n workflow that discovers trending AI and developer topics, generates viral GTM content using AI, scores its viral potential, and automatically distributes it across LinkedIn, Twitter/X, Slack, and Email.
 
